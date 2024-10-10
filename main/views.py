@@ -7,7 +7,6 @@ from django.http import JsonResponse
 
 @csrf_exempt
 def get_books(request):
-    print("hello")
     books = Books.objects.all()
     return JsonResponse({"status": 200, "data": list(book.to_dict() for book in books)})
 
@@ -66,23 +65,21 @@ def filter_book(request):
     if "id" in req:
         id = req["id"]
         books = Books.objects.filter(id=id)
-        return JsonResponse({"status":200, "data": list(book.to_dict() for book in books)})
-    
+
     elif "book_name" in req:
         book_name = req["book_name"]
         books = Books.objects.filter(book_name=book_name)
-        return JsonResponse({"status":200, "data": list(book.to_dict() for book in books)})
-       
+        
     elif "author_name" in req:
         author_name = req["author_name"]
         books = Books.objects.filter(author_name=author_name)
-        return JsonResponse({"status":200, "data": list(book.to_dict() for book in books)})
-    
+        
     elif "price" in req:
         lb = req["price"]["lb"]
         ub = req["price"]["ub"]
         books = Books.objects.filter(price__range=(lb, ub))
-        return JsonResponse({"status": 200, "data": list(book.to_dict() for book in books)})
+    
+    return JsonResponse({"status": 200, "data": list(book.to_dict() for book in books)})
 
 
 @csrf_exempt
@@ -97,36 +94,25 @@ def create_user(request):
 
 @csrf_exempt
 def get_all_users(request):
-    if request.method == "GET":
-        users = Users.objects.all()
-        return JsonResponse({"status": 200, "data": list(user.user_dict() for user in users)})
+    users = Users.objects.all()
+    return JsonResponse({"status": 200, "data": list(user.user_dict() for user in users)})
 
 @csrf_exempt
 def user_details(request):
-    if request.method == "GET":
-        user_id = request.GET.get("user_id", None)
-        User_name = request.GET.get("User_name", None)
-
-        if user_id:
-            users = Users.objects.filter(user_id=user_id)
-            return JsonResponse({"status": 200, "data": [user.user_dict() for user in users]}, status=200)
-
-        elif User_name:
-            users = Users.objects.filter(User_name=User_name)
-            return JsonResponse({"status": 200, "data": [user.user_dict() for user in users]}, status=200)
+    req = json.loads(request.body)
+    if "User_name" in req:
+        User_name = req["User_name"]
+        users = Users.objects.filter(User_name=User_name)
+      
+    elif "user_id" in req:
+        user_id = req["user_id"]
+        users = Users.objects.filter(user_id=user_id)
+      
+    elif "user_phone_no" in req:
+        user_phone_no = req["user_phone_no"]
+        users = Users.objects.filter(user_phone_no=user_phone_no)
     
-    elif request.method == "POST":
-        req = json.loads(request.body)
-        
-        if "User_name" in req:
-            User_name = req["User_name"]
-            users = Users.objects.filter(User_name=User_name)
-            return JsonResponse({"status": 200, "data": [user.user_dict() for user in users]}, status=200)
-
-        elif "user_id" in req:
-            user_id = req["user_id"]
-            users = Users.objects.filter(user_id=user_id)
-            return JsonResponse({"status": 200, "data": [user.user_dict() for user in users]}, status=200)
+    return JsonResponse({"status": 200, "data": list(user.user_dict() for user in users)})
 
 @csrf_exempt
 def update_user(request):
